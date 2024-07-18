@@ -1,79 +1,181 @@
-import React from "react";
-import { Button } from "@mui/material";
-import MealInfo from "./MealInfo";
+import React, { useState } from "react";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
+import Fab from "@mui/material/Fab";
+import {
+  Card,
+  CardMedia,
+  CardContent,
+  CardActions,
+  Typography,
+  Box,
+} from "@mui/material";
 
 function Meal({
-  showMealInfo,
-  selectedMeal,
-  setSelectedMeal,
-  menuCategoryItems,
-  searchQuery,
   mealCounts,
   incrementCount,
   decrementCount,
+  menuCategoryItems,
+  searchQuery,
+  selectedCategory,
 }) {
+  const [showCounters, setShowCounters] = useState({});
+
+  const handleAddClick = (mealId) => {
+    setShowCounters((prev) => ({ ...prev, [mealId]: true }));
+    incrementCount(mealId);
+  };
+
+  const handleIncrement = (mealId) => {
+    incrementCount(mealId);
+    const selectedMeal = findMealById(mealId);
+    if (selectedMeal) {
+      console.log(
+        `Incremented price for meal ${selectedMeal.product.name}: ${selectedMeal.product.price}`
+      );
+    }
+  };
+
+  const handleDecrement = (mealId) => {
+    decrementCount(mealId);
+    if (mealCounts[mealId] === 1) {
+      setShowCounters((prev) => ({ ...prev, [mealId]: false }));
+    }
+  };
+
+  const findMealById = (mealId) => {
+    for (let categoryItem of menuCategoryItems) {
+      const meal = categoryItem.menus.find(
+        (item) => item.product.id === mealId
+      );
+      if (meal) {
+        return meal;
+      }
+    }
+    return null;
+  };
+  const filteredMeals =
+    selectedCategory === "all"
+      ? menuCategoryItems?.flatMap((categoryItem) =>
+          categoryItem.menus.filter((mealItem) =>
+            mealItem.product.name
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase())
+          )
+        )
+      : menuCategoryItems &&
+        selectedCategory !== null &&
+        menuCategoryItems[selectedCategory]?.menus.filter((mealItem) =>
+          mealItem.product.name
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase())
+        );
+
   return (
-    <>
-      {menuCategoryItems &&
-        menuCategoryItems.map((categoryItem, categoryIndex) => {
+    <Box display='flex' flexWrap='wrap' justifyContent='center' mt={4}>
+      {filteredMeals &&
+        filteredMeals.map((mealItem, mealIndex) => {
+          const mealId = mealItem.product.id;
+          const count = mealCounts[mealId] || 0;
+
           return (
-            <div
-              key={categoryIndex}
-              className='w-[90%] mx-auto flex overflow-x-scroll gap-10 mt-6'
+            <Card
+              key={mealIndex}
+              sx={{
+                width: 300,
+                m: 2,
+                boxShadow: 3,
+                borderRadius: 2,
+                overflow: "hidden",
+                position: "relative",
+                transition: "transform 0.3s",
+                "&:hover": {
+                  transform: "scale(1.05)",
+                },
+              }}
             >
-              {categoryItem &&
-                categoryItem.menus
-                  .filter((mealItem) =>
-                    mealItem.product.name
-                      .toLowerCase()
-                      .includes(searchQuery.toLowerCase())
-                  )
-                  .map((mealItem, mealIndex) => {
-                    return (
-                      <div
-                        key={mealIndex}
-                        className='rounded-[15px] overflow-hidden shadow-xl flex-shrink-0 mb-8'
-                      >
-                        <img
-                          onClick={() => showMealInfo(mealItem)}
-                          className='h-[5rem] w-[10rem]'
-                          src={mealItem.product.image}
-                          alt=''
-                        />
-                        <p className='text-[1.5rem] font-[700] ml-4 mt-2 mb-2'>
-                          {mealItem.product.name}
-                        </p>
-                        <p className='ml-3'>{mealItem.star} </p>
-                        <div className='py-6 text-center'>
-                          <Button
-                            variant='contained'
-                            onClick={() => showMealInfo(mealItem)}
-                          >
-                            {mealItem.product.price},000 UZS
-                          </Button>
-                        </div>
-                      </div>
-                    );
-                  })}
-            </div>
+              <CardMedia
+                component='img'
+                image={mealItem.product.image}
+                alt={mealItem.product.name}
+                style={{ width: "100%", height: "12rem" }}
+              />
+              <CardContent>
+                <Typography variant='h6' component='div' color='textPrimary'>
+                  {mealItem.product.name}
+                </Typography>
+                <Typography variant='body2' color='textSecondary'>
+                  {mealItem.product.price} 000 sum
+                </Typography>
+              </CardContent>
+              <CardActions
+                sx={{
+                  justifyContent: "flex-end",
+                  pr: 2,
+                  pb: 2,
+                }}
+              >
+                {showCounters[mealId] ? (
+                  <>
+                    <Fab
+                      size='small'
+                      color='primary'
+                      aria-label='remove'
+                      onClick={() => handleDecrement(mealId)}
+                      sx={{
+                        backgroundColor: "#ff6a25",
+                        "&:hover": {
+                          backgroundColor: "#ff8a50",
+                        },
+                      }}
+                    >
+                      <RemoveIcon />
+                    </Fab>
+                    <Typography
+                      variant='h6'
+                      component='span'
+                      sx={{ mx: 2, display: "flex", alignItems: "center" }}
+                    >
+                      {count}
+                    </Typography>
+                    <Fab
+                      size='small'
+                      color='primary'
+                      aria-label='add'
+                      onClick={() => handleIncrement(mealId)}
+                      sx={{
+                        backgroundColor: "#ff6a25",
+                        "&:hover": {
+                          backgroundColor: "#ff8a50",
+                        },
+                      }}
+                    >
+                      <AddIcon />
+                    </Fab>
+                  </>
+                ) : (
+                  <Fab
+                    size='small'
+                    color='primary'
+                    aria-label='add'
+                    onClick={() => {
+                      handleAddClick(mealId);
+                    }}
+                    sx={{
+                      backgroundColor: "#ff6a25",
+                      "&:hover": {
+                        backgroundColor: "#ff8a50",
+                      },
+                    }}
+                  >
+                    <AddIcon />
+                  </Fab>
+                )}
+              </CardActions>
+            </Card>
           );
         })}
-      <div
-        className={`fixed overflow-y-scroll bottom-0 right-0 rounded-[20px] w-full h-[50%] bg-gray-500 text-white transform duration-200 transition-transform  ${
-          selectedMeal ? "translate-y-0" : "translate-y-full"
-        }`}
-      >
-        {selectedMeal && (
-          <MealInfo
-            mealCounts={mealCounts}
-            incrementCount={incrementCount}
-            decrementCount={decrementCount}
-            selectedMeal={selectedMeal}
-            setSelectedMeal={setSelectedMeal}
-          />
-        )}
-      </div>
-    </>
+    </Box>
   );
 }
 

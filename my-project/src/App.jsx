@@ -3,6 +3,7 @@ import Header from "./components/Header";
 import Meal from "./components/Meal";
 import MealCategory from "./components/MealCategory";
 import SearchMeal from "./components/SearchMeal";
+import { Container, Box } from "@mui/material";
 
 function App() {
   const [selectedMeal, setSelectedMeal] = useState(null);
@@ -10,30 +11,10 @@ function App() {
     setSelectedMeal(meal);
   };
 
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const showCategoryInfo = (meal) => {
-    setSelectedCategory(meal);
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const showCategoryInfo = (categoryIndex) => {
+    setSelectedCategory(categoryIndex);
   };
-
-  const [location, setLocation] = useState("Tashkent");
-  navigator.geolocation.getCurrentPosition(
-    (position) => {
-      const { latitude, longitude } = position.coords;
-      fetch(
-        `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=b3967e8af00a5057cd5900564fe3ee12&units=metric`
-      )
-        .then((response) => response.json())
-        .then((data) => {
-          const pos = `${data.name} ${data.coord.lat.toFixed(
-            1
-          )}, ${data.coord.lon.toFixed(2)}`;
-
-          setLocation(pos);
-        })
-        .catch((error) => console.error("Error fetching weather data:", error));
-    },
-    (error) => console.error("Error getting location:", error)
-  );
 
   const [menuCategoryItems, setMenuCategoryItems] = useState([]);
 
@@ -55,8 +36,12 @@ function App() {
 
     fetchMenuItems();
   }, []);
-  console.log(menuCategoryItems);
+
   const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
 
   const [mealCounts, setMealCounts] = useState({});
 
@@ -75,30 +60,38 @@ function App() {
   };
 
   return (
-    <div className=''>
+    <div className='sm:w-[70%] mx-auto'>
       <Header />
-      <SearchMeal
-        location={location}
-        setLocation={setLocation}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-      />
-      <MealCategory
-        menuCategoryItems={menuCategoryItems.data}
-        showCategoryInfo={showCategoryInfo}
-        selectedCategory={selectedCategory}
-        setSelectedCategory={setSelectedCategory}
-      />
-      <Meal
-        mealCounts={mealCounts}
-        incrementCount={incrementCount}
-        decrementCount={decrementCount}
-        menuCategoryItems={menuCategoryItems.data}
-        showMealInfo={showMealInfo}
-        setSelectedMeal={setSelectedMeal}
-        selectedMeal={selectedMeal}
-        searchQuery={searchQuery}
-      />
+      <Container>
+        <Box mt={4}>
+          <MealCategory
+            menuCategoryItems={menuCategoryItems.data}
+            showCategoryInfo={showCategoryInfo}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+          />
+        </Box>
+        <Box mt={4}>
+          <SearchMeal
+            searchTerm={searchQuery}
+            handleSearchChange={handleSearchChange}
+          />
+        </Box>
+
+        <Box mt={4}>
+          <Meal
+            mealCounts={mealCounts}
+            incrementCount={incrementCount}
+            decrementCount={decrementCount}
+            menuCategoryItems={menuCategoryItems.data}
+            showMealInfo={showMealInfo}
+            setSelectedMeal={setSelectedMeal}
+            selectedMeal={selectedMeal}
+            searchQuery={searchQuery}
+            selectedCategory={selectedCategory}
+          />
+        </Box>
+      </Container>
     </div>
   );
 }

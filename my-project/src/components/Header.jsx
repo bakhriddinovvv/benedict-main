@@ -1,20 +1,25 @@
 import React from "react";
+import { AppBar, Toolbar, Typography } from "@mui/material";
 
-function Header() {
+const Header = () => {
   return (
     <div>
-      <div className='flex mt-4 w-[90%] items-center  mx-auto gap-8 text-[1.2rem] shadow-lg pb-4'>
-        <p className='text-green-500 flex items-center justify-center text-[1.7rem] ml-6  font-bold'>
-          Benedict
-        </p>
+      <div className='w-[95%] mx-auto mt-2'>
+        <AppBar className='rounded-[10px]' position='static'>
+          <Toolbar className=' mx-auto'>
+            <Typography className='' variant='h6'>
+              Welcome to the Benedict cafe
+            </Typography>
+          </Toolbar>
+        </AppBar>
       </div>
-
       <img
-        src='https://robosell.ams3.digitaloceanspaces.com/robosell/banner/mobile/benedict.png '
-        className='w-[90%] mx-auto mt-4 rounded-[10px]'
+        className='w-[95%] mx-auto rounded-[15px] mt-4'
+        src='https://robosell.ams3.digitaloceanspaces.com/robosell/banner/mobile/benedict.png'
         alt=''
       />
     </div>
   );
-}
+};
+
 export default Header;
